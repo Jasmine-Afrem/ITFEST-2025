@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 type Salon = {
   id: number;
@@ -13,16 +14,28 @@ type Salon = {
   sectiune: string;
 };
 
-const initialSaloane: Salon[] = [
-  { id: 1, numar_salon: '101', tip_salon: 'General', capacitate: 2, ocupat: 1, status: 'Ocupat', etaj: 1, sectiune: 'A' },
-  { id: 2, numar_salon: '102', tip_salon: 'Terapie Intensiva', capacitate: 1, ocupat: 0, status: 'Liber', etaj: 1, sectiune: 'A' },
-  { id: 3, numar_salon: '201', tip_salon: 'Urgenta', capacitate: 3, ocupat: 2, status: 'Ocupat', etaj: 2, sectiune: 'B' },
-  { id: 4, numar_salon: '202', tip_salon: 'Privat', capacitate: 1, ocupat: 0, status: 'Liber', etaj: 2, sectiune: 'B' },
-];
-
 export default function HartaSpitalului() {
-  const [saloane, setSaloane] = useState<Salon[]>(initialSaloane);
+  const [saloane, setSaloane] = useState<Salon[]>([]);
   const [selectedSalon, setSelectedSalon] = useState<Salon | null>(null);
+  const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
+  const [highestFloor, setHighestFloor] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchSaloane = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/rooms/saloane');
+        const data: Salon[] = response.data;
+
+        setSaloane(data);
+        const maxEtaj = Math.max(...data.map(salon => salon.etaj));
+        setHighestFloor(maxEtaj);
+      } catch (error) {
+        console.error('Error fetching saloane data:', error);
+      }
+    };
+
+    fetchSaloane();
+  }, []);
 
   const handleSalonClick = (salon: Salon) => {
     setSelectedSalon(salon);
@@ -32,25 +45,35 @@ export default function HartaSpitalului() {
     setSelectedSalon(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof Salon) => {
-    if (selectedSalon) {
-      const updatedSalon = { ...selectedSalon, [field]: e.target.value };
-      setSelectedSalon(updatedSalon);
-      setSaloane(saloane.map(s => (s.id === updatedSalon.id ? updatedSalon : s)));
-    }
-  };
+  const filteredSaloane = selectedFloor !== null
+    ? saloane.filter(salon => salon.etaj === selectedFloor)
+    : saloane;
 
   return (
     <div>
       <h1>Harta Spitalului</h1>
+      <label>
+        Selectează Etaj:
+        <select onChange={e => setSelectedFloor(e.target.value ? Number(e.target.value) : null)} value={selectedFloor ?? ''}>
+          <option value="">Toate Etajele</option>
+          <option value="0">Parter</option>
+          {[...Array(highestFloor).keys()].map(floor => (
+            <option key={floor + 1} value={floor + 1}>
+              Etaj {floor + 1}
+            </option>
+          ))}
+        </select>
+      </label>
       <div className="grid-container">
-        {saloane.map(salon => (
+        {filteredSaloane.map(salon => (
           <div
             key={salon.id}
             className={`grid-item ${salon.status.toLowerCase()}`}
             onClick={() => handleSalonClick(salon)}
           >
             <span className="text-negru">{salon.numar_salon}</span>
+            <br />
+            <span className="text-mic">{salon.capacitate} locuri</span>
           </div>
         ))}
       </div>
@@ -60,36 +83,20 @@ export default function HartaSpitalului() {
           <div className="modal-content">
             <h2>Detalii Salon {selectedSalon.numar_salon}</h2>
             <label>
-              Etaj:
-              <input
-                type="number"
-                value={selectedSalon.etaj}
-                onChange={e => handleInputChange(e, 'etaj')}
-              />
-            </label>
-            <label>
               Secțiune:
-              <input
-                type="text"
-                value={selectedSalon.sectiune}
-                onChange={e => handleInputChange(e, 'sectiune')}
-              />
+              <span>{selectedSalon.sectiune}</span>
             </label>
             <label>
               Tip Salon:
-              <input
-                type="text"
-                value={selectedSalon.tip_salon}
-                onChange={e => handleInputChange(e, 'tip_salon')}
-              />
+              <span>{selectedSalon.tip_salon}</span>
+            </label>
+            <label>
+              Capacitate:
+              <span>{selectedSalon.capacitate} locuri</span>
             </label>
             <label>
               Status:
-              <input
-                type="text"
-                value={selectedSalon.status}
-                onChange={e => handleInputChange(e, 'status')}
-              />
+              <span>{selectedSalon.status}</span>
             </label>
             <button onClick={handleCloseModal}>Închide</button>
           </div>
@@ -105,6 +112,7 @@ export default function HartaSpitalului() {
         }
         .grid-item {
           display: flex;
+          flex-direction: column;
           justify-content: center;
           align-items: center;
           height: 100px;
@@ -142,11 +150,6 @@ export default function HartaSpitalului() {
           display: block;
           margin-top: 10px;
         }
-        input {
-          width: 100%;
-          padding: 8px;
-          margin-top: 5px;
-        }
         button {
           margin-top: 20px;
           padding: 10px 20px;
@@ -157,6 +160,10 @@ export default function HartaSpitalului() {
         }
         .text-negru {
           color: black;
+        }
+        .text-mic {
+          font-size: 12px;
+          color: gray;
         }
       `}</style>
     </div>

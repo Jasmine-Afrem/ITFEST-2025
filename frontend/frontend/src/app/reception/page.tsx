@@ -1,12 +1,9 @@
-import React from 'react';
+'use client';
 
-const Reception: React.FC = () => {
-  return (
-    <main>
-      <h1>Reception</h1>
-      {/* Add reception content here */}
-    </main>
-  );
+import { FC } from "react";
+
+const ReceptionDashboard: FC = () => {
+  return <h1>Hello, World!</h1>;
 };
 
-export default Reception;
+export default ReceptionDashboard;

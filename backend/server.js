@@ -12,13 +12,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", // Allows connections from any origin
     methods: ["GET", "POST"],
   },
 });
 
 // Middleware
-app.use(cors());
+app.use(cors()); // Enables CORS for all origins
 app.use(bodyParser.json());
 
 // Routes
