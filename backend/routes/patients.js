@@ -10,6 +10,37 @@ router.get("/", (req, res) => {
   });
 });
 
+// Search Patients Not in a Room
+router.get("/not-in-room", (req, res) => {
+  const query = `
+    SELECT p.* 
+    FROM pacienti p
+    LEFT JOIN pacienti_saloane ps ON p.id = ps.id_pacient AND ps.data_externare IS NULL
+    WHERE ps.id_pacient IS NULL
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).json({ error: "Server error", details: err });
+    res.json(results);
+  });
+});
+
+// Search Patients by Name
+router.get("/search", (req, res) => {
+  const { name } = req.query;
+  if (!name) {
+    return res.status(400).json({ error: "Name query parameter is required" });
+  }
+
+  const query = "SELECT * FROM pacienti WHERE nume LIKE ? OR prenume LIKE ?";
+  const values = [`%${name}%`, `%${name}%`];
+
+  db.query(query, values, (err, results) => {
+    if (err) return res.status(500).json({ error: "Server error", details: err });
+    res.json(results);
+  });
+});
+
 // Add New Patient
 router.post("/create", (req, res) => {
   const {

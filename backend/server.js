@@ -12,24 +12,26 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allows connections from any origin
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
 // Middleware
-app.use(cors()); // Enables CORS for all origins
+app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
 app.use("/auth", require("./routes/auth"));
 app.use("/patients", require("./routes/patients"));
 app.use("/rooms", require("./routes/rooms"));
-app.use("/patientrooms", require("./routes/patientrooms"));
+app.use("/patientrooms", require("./routes/patientrooms")(io)); // 👈 Pasăm io
+app.use("/cam", require("./routes/cam"));
 
 // WebSockets for real-time updates
 io.on("connection", (socket) => {
   console.log("A user connected");
+
   socket.on("disconnect", () => {
     console.log("A user disconnected");
   });

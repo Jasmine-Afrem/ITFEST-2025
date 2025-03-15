@@ -36,8 +36,9 @@ const Input = styled.input`
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #568eff;
   border-radius: 5px;
+  color: black;
 `;
 
 const SubmitButton = styled.button`
@@ -120,7 +121,7 @@ export default function PatientModal({ closeModal, refreshPatients }: PatientMod
     <ModalOverlay>
       <ModalContent>
         <CloseButton onClick={closeModal}>X</CloseButton>
-        <h3>Add New Patient</h3>
+        <h3>Adauga Pacient Nou</h3>
         <Input name="nume" placeholder="First Name" onChange={handleChange} />
         <Input name="prenume" placeholder="Last Name" onChange={handleChange} />
         <Input name="data_nasterii" type="date" placeholder="Date of Birth" onChange={handleChange} />

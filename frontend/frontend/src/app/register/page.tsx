@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import Image from "next/image";
 import styled from "styled-components";
 
 interface RegisterForm {
@@ -28,68 +29,155 @@ interface RegisterForm {
 // Styled Components
 const PageWrapper = styled.div`
   min-height: 100vh;
-  background-color: white;
+  background-color: #175676;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+`;
+
+const LogoContainer = styled.div`
+  margin-bottom: 0px;
 `;
 
 const FormContainer = styled.div`
-  max-width: 50%;
-  background: #a4161a;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  color: white;
+  max-width: 600px;
+  background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(244, 247, 251) 100%);
+  border-radius: 30px;
+  padding: 30px;
+  border: 5px solid rgb(255, 255, 255);
+  box-shadow: rgba(133, 189, 215, 0.3) 0px 6px 15px, 
+              rgba(133, 189, 215, 0.2) 0px -6px 15px, 
+              rgba(133, 189, 215, 0.2) 6px 0px 15px, 
+              rgba(133, 189, 215, 0.2) -6px 0px 15px;
+  margin-bottom: 10%;
+  margin-top: -2rem;
 `;
 
 const Title = styled.h2`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
   text-align: center;
+  font-weight: 900;
+  font-size: 32px;
+  margin-bottom: 4rem;
+  background: linear-gradient(45deg, #175676, #4BA3C3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 `;
 
 const ErrorMessage = styled.p`
-  color: #ffcccb;
+  color: red;
   font-size: 14px;
   margin-top: -10px;
   margin-bottom: 10px;
 `;
 
+const Form = styled.form`
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+`;
+
+const FullWidthRow = styled.div`
+  grid-column: span 2;
+`;
+
+const Label = styled.label`
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+`;
+
 const StyledInput = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  background: #F5F5F5;
+  border: 2px solid #CCCCCC;
+  padding: 12px;
+  border-radius: 20px;
+  box-shadow: rgba(207, 240, 255, 0.4) 0px 5px 10px -3px;
   font-size: 16px;
+  transition: all 0.3s ease-in-out;
+
+  &::placeholder {
+    color: rgb(170, 170, 170);
+  }
+
+  &:hover {
+    border-color: #4BA3C3;
+    box-shadow: rgba(75, 163, 195, 0.5) 0px 8px 12px -3px;
+  }
+
   &:focus {
-    border-color: #007bff;
     outline: none;
+    border-color: #4BA3C3;
+    box-shadow: rgba(75, 163, 195, 0.7) 0px 10px 15px -3px;
   }
 `;
 
+// Custom Input Component to track user input and ensure text stays black
+const Input = ({ register, name, placeholder, required, type = "text" }: any) => {
+  const [inputValue, setInputValue] = useState("");
+
+  return (
+    <StyledInput
+      {...register(name, { required })}
+      type={type}
+      placeholder={placeholder}
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      style={{ color: inputValue ? "#333" : "rgb(150, 150, 150)" }} // Keeps text black after typing
+    />
+  );
+};
+
 const StyledSelect = styled.select`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  background: #F5F5F5;
+  border: 2px solid #CCCCCC;
+  padding: 12px;
+  border-radius: 20px;
+  box-shadow: rgba(207, 240, 255, 0.4) 0px 5px 10px -3px;
   font-size: 16px;
+  color: rgb(150, 150, 150);
+  transition: all 0.3s ease-in-out;
+  appearance: none;
+
+  &:hover {
+    border-color: #4BA3C3;
+    box-shadow: rgba(75, 163, 195, 0.5) 0px 8px 12px -3px;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4BA3C3;
+    box-shadow: rgba(75, 163, 195, 0.7) 0px 10px 15px -3px;
+  }
 `;
 
-const StyledButton = styled.button`
-  width: 100%;
-  padding: 10px;
-  background: #007bff;
+const RegisterButton = styled.button`
+  display: block;
+  width: 35%;
+  font-weight: bold;
+  background: linear-gradient(45deg, #175676 0%, #4BA3C3 100%);
   color: white;
-  font-size: 16px;
+  padding-block: 15px;
+  margin: 20px auto;
+  border-radius: 20px;
+  box-shadow: rgba(23, 86, 118, 0.88) 0px 20px 10px -15px;
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
   &:hover {
-    background: #0056b3;
+    transform: scale(1.03);
+    box-shadow: rgba(23, 86, 118, 0.88) 0px 23px 10px -20px;
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: rgba(23, 86, 118, 0.88) 0px 15px 10px -10px;
   }
 `;
 
@@ -104,90 +192,121 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      const response = await axios.post("http://localhost:5000/auth/register", data);
+      const response = await axios.post(
+        "http://localhost:5000/auth/register",
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       setMessage(response.data.message);
     } catch (error: any) {
-      if (error.response?.status === 400) {
-        setMessage("User already exists. Please check your email, CNP, or phone number.");
-      } else {
-        setMessage(error.response?.data?.error || "Registration failed.");
-      }
+      setMessage(error.response?.data?.error || "Registration failed.");
     }
   };
 
   return (
     <PageWrapper>
+      <LogoContainer>
+        <Image src="/HealthSentinel-Photoroom.png" alt="HealthSentinel Logo" width={300} height={250} />
+      </LogoContainer>
+
       <FormContainer>
         <Title>Register</Title>
         {message && <ErrorMessage>{message}</ErrorMessage>}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <StyledInput {...register("nume", { required: "Nume is required" })} placeholder="Nume" />
-          {errors.nume && <ErrorMessage>{errors.nume.message}</ErrorMessage>}
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <div>
+            <Label>Nume</Label>
+            <Input register={register} name="nume" placeholder="Nume" required />
+          </div>
+          <div>
+            <Label>Prenume</Label>
+            <Input register={register} name="prenume" placeholder="Prenume" required />
+          </div>
+          <div>
+            <Label>CNP</Label>
+            <Input register={register} name="cnp" placeholder="CNP" required />
+          </div>
+          <div>
+            <Label>Serie & Nr. Buletin</Label>
+            <Input register={register} name="serie_numar_buletin" placeholder="Serie & Nr. Buletin" required />
+          </div>
+          <div>
+            <Label>Cetățenie</Label>
+            <Input register={register} name="cetatenie" placeholder="Cetățenie" required />
+          </div>
+          <div>
+            <Label>Loc Naștere</Label>
+            <Input register={register} name="loc_nastere" placeholder="Loc Naștere" required />
+          </div>
+          <div>
+            <Label>Adresă</Label>
+            <Input register={register} name="adresa" placeholder="Adresă" required />
+          </div>
 
-          <StyledInput {...register("prenume", { required: "Prenume is required" })} placeholder="Prenume" />
-          {errors.prenume && <ErrorMessage>{errors.prenume.message}</ErrorMessage>}
+          <FullWidthRow>
+            <Label>Rol</Label>
+            <StyledSelect {...register("rol", { required: "Required" })}>
+              <option value="">Select Role</option>
+              <option value="Medic">Medic</option>
+              <option value="Asistenta">Asistenta</option>
+              <option value="Receptioner">Receptioner</option>
+              <option value="Administrator">Administrator</option>
+            </StyledSelect>
+          </FullWidthRow>
 
-          <StyledInput {...register("cnp", { required: "CNP is required", minLength: 13, maxLength: 13 })} placeholder="CNP" />
-          {errors.cnp && <ErrorMessage>CNP must be exactly 13 characters</ErrorMessage>}
+          <div>
+            <Label>Departament</Label>
+            <Input register={register} name="departament" placeholder="Departament" required />
+          </div>
+          <div>
+            <Label>Specializare</Label>
+            <Input register={register} name="specializare" placeholder="Specializare" required />
+          </div>
+          <div>
+            <Label>Grad Profesional</Label>
+            <Input register={register} name="grad_profesional" placeholder="Grad Profesional" required />
+          </div>
+          <div>
+            <Label>Telefon</Label>
+            <Input register={register} name="telefon" placeholder="Telefon" required />
+          </div>
+          <div>
+            <Label>Email</Label>
+            <Input register={register} name="email" type="email" placeholder="Email" required />
+          </div>
+          <div>
+            <Label>Parola</Label>
+            <Input register={register} name="parola" type="password" placeholder="Parola" required />
+          </div>
 
-          <StyledInput {...register("serie_numar_buletin", { required: "Required" })} placeholder="Serie & Numar Buletin" />
-          {errors.serie_numar_buletin && <ErrorMessage>Required</ErrorMessage>}
+          <div>
+            <Label>Contract Început</Label>
+            <Input register={register} name="contract_inceput" type="date" required />
+          </div>
+          <div>
+            <Label>Contract Sfârșit</Label>
+            <Input register={register} name="contract_sfarsit" type="date" required />
+          </div>
 
-          <StyledInput {...register("cetatenie", { required: "Cetatenie is required" })} placeholder="Cetatenie" />
-          {errors.cetatenie && <ErrorMessage>{errors.cetatenie.message}</ErrorMessage>}
+          <FullWidthRow>
+            <Label>Status Angajat</Label>
+            <StyledSelect {...register("status_angajat", { required: "Required" })}>
+              <option value="">Select Status</option>
+              <option value="Activ">Activ</option>
+              <option value="Concediu">Concediu</option>
+              <option value="Suspendat">Suspendat</option>
+              <option value="Inactiv">Inactiv</option>
+            </StyledSelect>
+          </FullWidthRow>
 
-          <StyledInput {...register("loc_nastere", { required: "Locul nasterii is required" })} placeholder="Loc Nastere" />
-          {errors.loc_nastere && <ErrorMessage>{errors.loc_nastere.message}</ErrorMessage>}
-
-          <StyledInput {...register("adresa", { required: "Adresa is required" })} placeholder="Adresa" />
-          {errors.adresa && <ErrorMessage>{errors.adresa.message}</ErrorMessage>}
-
-          <StyledSelect {...register("rol", { required: "Rol is required" })}>
-            <option value="">Select Rol</option>
-            <option value="Medic">Medic</option>
-            <option value="Asistenta">Asistenta</option>
-            <option value="Receptioner">Receptioner</option>
-            <option value="Administrator">Administrator</option>
-          </StyledSelect>
-          {errors.rol && <ErrorMessage>{errors.rol.message}</ErrorMessage>}
-
-          <StyledInput {...register("departament", { required: "Departament is required" })} placeholder="Departament" />
-          {errors.departament && <ErrorMessage>{errors.departament.message}</ErrorMessage>}
-
-          <StyledInput {...register("specializare", { required: "Specializare is required" })} placeholder="Specializare" />
-          {errors.specializare && <ErrorMessage>{errors.specializare.message}</ErrorMessage>}
-
-          <StyledInput {...register("grad_profesional", { required: "Grad profesional is required" })} placeholder="Grad Profesional" />
-          {errors.grad_profesional && <ErrorMessage>{errors.grad_profesional.message}</ErrorMessage>}
-
-          <StyledInput {...register("telefon", { required: "Telefon is required" })} placeholder="Telefon" />
-          {errors.telefon && <ErrorMessage>{errors.telefon.message}</ErrorMessage>}
-
-          <StyledInput {...register("email", { required: "Email is required" })} type="email" placeholder="Email" />
-          {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-
-          <StyledInput {...register("parola", { required: "Minimum 6 characters required", minLength: 6 })} type="password" placeholder="Parola" />
-          {errors.parola && <ErrorMessage>{errors.parola.message}</ErrorMessage>}
-
-          <StyledInput {...register("contract_inceput", { required: "Required" })} type="date" />
-          {errors.contract_inceput && <ErrorMessage>Required</ErrorMessage>}
-
-          <StyledInput {...register("contract_sfarsit", { required: "Required" })} type="date" />
-          {errors.contract_sfarsit && <ErrorMessage>Required</ErrorMessage>}
-
-          <StyledSelect {...register("status_angajat", { required: "Required" })}>
-            <option value="">Select Status</option>
-            <option value="Activ">Activ</option>
-            <option value="Concediu">Concediu</option>
-            <option value="Suspendat">Suspendat</option>
-            <option value="Inactiv">Inactiv</option>
-          </StyledSelect>
-          {errors.status_angajat && <ErrorMessage>{errors.status_angajat.message}</ErrorMessage>}
-
-          <StyledButton type="submit">Register</StyledButton>
-        </form>
+          <FullWidthRow>
+            <RegisterButton type="submit">Register</RegisterButton>
+          </FullWidthRow>
+        </Form>
       </FormContainer>
     </PageWrapper>
   );
 }
+

@@ -63,7 +63,7 @@ router.post('/register', async (req, res) => {
           'INSERT INTO personal_spital (nume, prenume, cnp, serie_numar_buletin, cetatenie, loc_nastere, adresa, rol, departament, specializare, grad_profesional, telefon, email, parola_hash, contract_inceput, contract_sfarsit, status_angajat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [nume, prenume, cnp, serie_numar_buletin, cetatenie, loc_nastere, adresa, rol, departament, specializare, grad_profesional, telefon, email, hashedPassword, contract_inceput, contract_sfarsit, status_angajat],
           (err, result) => {
-            if (err) return res.status(500).json({ error: 'Error registering user' });
+            if (err) return res.status(500).json({ error: 'Error registering user' + err });
 
             const personalSpitalId = result.insertId;
 
@@ -84,6 +84,5 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
 
 module.exports = router;
