@@ -25,6 +25,7 @@ app.use(bodyParser.json());
 app.use("/auth", require("./routes/auth"));
 app.use("/patients", require("./routes/patients"));
 app.use("/rooms", require("./routes/rooms"));
+app.use("/patientrooms", require("./routes/patientrooms"));
 
 // WebSockets for real-time updates
 io.on("connection", (socket) => {

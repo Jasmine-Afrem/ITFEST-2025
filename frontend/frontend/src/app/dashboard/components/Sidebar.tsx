@@ -1,3 +1,5 @@
+"use client";
+
 import styled from "styled-components";
 import Link from "next/link";
 
@@ -31,7 +33,7 @@ export default function Sidebar() {
     <SidebarContainer>
       <h2>HealthSentinel</h2>
       <Link href="/dashboard"><SidebarItem>Dashboard</SidebarItem></Link>
-      <Link href="/patients"><SidebarItem>Patients</SidebarItem></Link>
+      <Link href="/dashboard/patients"><SidebarItem>Patients</SidebarItem></Link>
       <Link href="/settings"><SidebarItem>Settings</SidebarItem></Link>
       <Link href="/logout"><SidebarItem>Logout</SidebarItem></Link>
     </SidebarContainer>

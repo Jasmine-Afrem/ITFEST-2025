@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -14,11 +13,18 @@ type Salon = {
   sectiune: string;
 };
 
+type Patient = {
+  id: number;
+  nume: string;
+  prenume: string;
+};
+
 export default function HartaSpitalului() {
   const [saloane, setSaloane] = useState<Salon[]>([]);
   const [selectedSalon, setSelectedSalon] = useState<Salon | null>(null);
   const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
   const [highestFloor, setHighestFloor] = useState<number>(0);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
   useEffect(() => {
     const fetchSaloane = async () => {
@@ -43,6 +49,19 @@ export default function HartaSpitalului() {
 
   const handleCloseModal = () => {
     setSelectedSalon(null);
+    setPatients([]); // Clear patients when closing the modal
+  };
+
+  const handleShowPatients = async () => {
+    if (selectedSalon) {
+      try {
+        const response = await axios.get(`http://localhost:5000/patientrooms/room/${selectedSalon.id}`);
+        const data: Patient[] = response.data;
+        setPatients(data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      }
+    }
   };
 
   const filteredSaloane = selectedFloor !== null
@@ -99,6 +118,20 @@ export default function HartaSpitalului() {
               <span>{selectedSalon.status}</span>
             </label>
             <button onClick={handleCloseModal}>Închide</button>
+            <button onClick={handleShowPatients}>Arată toți pacienții</button>
+
+            {patients.length > 0 && (
+              <div>
+                <h3>Pacienți în acest salon:</h3>
+                <ul>
+                  {patients.map(patient => (
+                    <li key={patient.id}>
+                      {patient.nume} {patient.prenume}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}
