@@ -10,7 +10,10 @@ type Salon = {
   ocupat: number;
   status: 'Liber' | 'Ocupat' | 'In Mentenanta';
   etaj: number;
-  sectiune: string;
+  sectiune: string,
+  isFull: number,
+  ocupare: string,
+  pacienti_internati: number;
 };
 
 type Patient = {
@@ -107,6 +110,7 @@ export default function HartaSpitalului() {
       console.error('Error assigning patient to room:', error);
     }
   };
+ 
   
   const handleDeletePatient = async (patientId: number) => {
     const confirmDelete = window.confirm('Ești sigur că vrei să scoți acest pacient din salon?');
@@ -184,6 +188,14 @@ export default function HartaSpitalului() {
               <label>
                 Status:
                 <span>{selectedSalon.status}</span>
+              </label>
+              <label>
+                Este full?:
+                <span>{selectedSalon.isFull}</span>
+              </label>
+              <label>
+                Cate persoane sunt internate:
+                <span>{selectedSalon.pacienti_internati}</span>
               </label>
               <button onClick={handleCloseModal}>Închide</button>
               <button onClick={handleShowPatients}>Arată pacienții din salon</button>

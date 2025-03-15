@@ -27,6 +27,7 @@ app.use("/patients", require("./routes/patients"));
 app.use("/rooms", require("./routes/rooms"));
 app.use("/patientrooms", require("./routes/patientrooms")(io)); // 👈 Pasăm io
 app.use("/cam", require("./routes/cam"));
+app.use("/medicalrecords", require("./routes/medicalrecords"));
 
 // WebSockets for real-time updates
 io.on("connection", (socket) => {

@@ -28,31 +28,38 @@ interface RegisterForm {
 
 // Styled Components
 const PageWrapper = styled.div`
-  min-height: 100vh;
+  position: fixed; /* Keeps background fixed */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
   background-color: #175676;
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
-  position: relative;
 `;
 
 const LogoContainer = styled.div`
-  margin-bottom: 0px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 `;
 
 const FormContainer = styled.div`
   max-width: 600px;
+  max-height: 80vh; /* Limits form height */
+  overflow-y: auto; /* Enables scrolling */
   background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(244, 247, 251) 100%);
-  border-radius: 30px;
-  padding: 30px;
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 5rem;
   border: 5px solid rgb(255, 255, 255);
   box-shadow: rgba(133, 189, 215, 0.3) 0px 6px 15px, 
               rgba(133, 189, 215, 0.2) 0px -6px 15px, 
               rgba(133, 189, 215, 0.2) 6px 0px 15px, 
               rgba(133, 189, 215, 0.2) -6px 0px 15px;
-  margin-bottom: 10%;
-  margin-top: -2rem;
+  width: 100%; /* Ensures it stays full width inside FormWrapper */
 `;
 
 const Title = styled.h2`
@@ -89,6 +96,7 @@ const Label = styled.label`
   color: #333;
   display: block;
   margin-bottom: 5px;
+  margin-left: 3px;
 `;
 
 const StyledInput = styled.input`
@@ -208,7 +216,7 @@ export default function RegisterPage() {
   return (
     <PageWrapper>
       <LogoContainer>
-        <Image src="/HealthSentinel-Photoroom.png" alt="HealthSentinel Logo" width={300} height={250} />
+        <Image src="/HealthSentinel-Photoroom.png" alt="HealthSentinel Logo" width={320} height={250} />
       </LogoContainer>
 
       <FormContainer>

@@ -24,3 +24,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-roboto), sans-serif !important; /* Use Roboto */
 }
+html, body {
+  overflow: hidden;
+  height: 100%;
+}

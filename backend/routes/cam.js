@@ -1,38 +1,32 @@
-const express = require('express');
-const Tesseract = require('tesseract.js');
-
+const express = require("express");
+const axios = require("axios"); // Add axios to make HTTP requests
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-  console.log("Received image for OCR");
-  const { imageBase64 } = req.body;  // Receive the base64 image from frontend
+// Handle image processing
+router.post("/", async (req, res) => {
+  const { imageBase64 } = req.body;  // Get the base64 image data
 
-  // Validate if the image is provided
-  if (!imageBase64) {A
-    console.log("No image provided");
-    return res.status(400).json({ error: 'No image provided' });
+  if (!imageBase64) {
+    return res.status(400).json({ error: "No image provided" }); // If no image, return an error
   }
 
   try {
-    // Run OCR using Tesseract.js on the provided image
-    const result = await Tesseract.recognize(
-      imageBase64,  // base64 image sent from frontend
-      'ron',  // Language: Romanian
-      {
-        logger: (m) => console.log(m),  // Log OCR progress
-      }
-    );
+    // Send the image to the OCR API (ImgOCR example here)
+    const apiUrl = "https://www.imgocr.com/api/imgocr_get_text";
+    const response = await axios.post(apiUrl, {
+      api_key: "44bf430bf52f3b5b85b092b5eb2984d2", // Your API key
+      image: imageBase64, // Send the image base64
+    });
 
-    // Send back the extracted text from the OCR
-    res.status(200).json({ text: result.data.text });
+    if (response.status === 200) {
+      const ocrData = response.data;
+      return res.json({ text: ocrData.text || "No text found" }); // Send back the extracted text
+    } else {
+      return res.status(500).json({ error: "OCR API request failed" }); // If OCR API fails
+    }
   } catch (error) {
-    console.error("OCR Error:", error);
-    res.status(500).json({ error: 'OCR processing failed' });
+    return res.status(500).json({ error: "An error occurred during OCR processing" }); // Handle errors
   }
-});
-
-router.get('/', async (req, res) => {
-  res.json({ message: 'Hello from CAM API' });
 });
 
 module.exports = router;

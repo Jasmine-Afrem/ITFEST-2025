@@ -21,7 +21,7 @@ const SidebarContainer = styled(motion.div)`
   top: 6vh;
   border-radius: 20px;
   transition: all 0.3s ease-in-out;
-
+  z-index:2;
   @media (max-width: 768px) {
     width: 220px;
     left: 1vh;

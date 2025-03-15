@@ -81,5 +81,33 @@ module.exports = (io) => {
     );
   });
 
+  // 5️⃣ Verifică dacă un salon este ocupat sau a atins capacitatea maximă
+router.get("/status/:id_salon", (req, res) => {
+  const { id_salon } = req.params;
+
+  db.query(
+    `SELECT s.capacitate, COUNT(ps.id_pacient) AS pacienti_internati
+     FROM saloane s
+     LEFT JOIN pacienti_saloane ps ON s.id = ps.id_salon AND ps.data_externare IS NULL
+     WHERE s.id = ?
+     GROUP BY s.id`,
+    [id_salon],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: "Server error", details: err });
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+
+      const { capacitate, pacienti_internati } = results[0];
+      const isFull = pacienti_internati >= capacitate;
+      const status = isFull ? "Full" : "Available";
+
+      res.json({ id_salon, capacitate, pacienti_internati, status });
+    }
+  );
+});
+
+
   return router;
 };

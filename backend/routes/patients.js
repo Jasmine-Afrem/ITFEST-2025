@@ -6,7 +6,14 @@ const router = express.Router();
 router.get("/", (req, res) => {
   db.query("SELECT * FROM pacienti", (err, results) => {
     if (err) return res.status(500).json({ error: "Server error", details: err });
-    res.json(results);
+
+    // Convertim data_nasterii într-un format mai ușor de citit
+    const formattedResults = results.map((pacient) => ({
+      ...pacient,
+      data_nasterii: new Date(pacient.data_nasterii).toISOString().split('T')[0] // Format YYYY-MM-DD
+    }));
+
+    res.json(formattedResults);
   });
 });
 
