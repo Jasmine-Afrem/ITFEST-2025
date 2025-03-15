@@ -1,117 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
-import { Patient } from "./types"; // ✅ Import the shared type
+import PatientModal from "../components/PatientModal";
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+const Header = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 `;
 
-const ModalContent = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-`;
-
-const CloseButton = styled.button`
-  float: right;
-  background: red;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-`;
-
-const SubmitButton = styled.button`
-  width: 100%;
-  padding: 10px;
+const AddPatientButton = styled.button`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   background: #3b82f6;
   color: white;
+  font-size: 24px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
   &:hover {
     background: #2563eb;
   }
 `;
 
-interface PatientModalProps {
-  closeModal: () => void;
-  refreshPatients: React.Dispatch<React.SetStateAction<Patient[]>>;
+const PatientsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+`;
+
+const PatientCard = styled.div`
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  position: relative;
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 50%;
+  cursor: pointer;
+  &:hover {
+    background: darkred;
+  }
+`;
+
+interface Patient {
+  id: number;
+  nume: string;
+  prenume: string;
+  data_nasterii: string;
+  gen: string;
+  telefon: string;
+  email: string;
 }
 
-export default function PatientModal({ closeModal, refreshPatients }: PatientModalProps) {
-  const [formData, setFormData] = useState<Omit<Patient, "id">>({
-    nume: "",
-    prenume: "",
-    data_nasterii: "",
-    gen: "",
-    telefon: "",
-    email: "",
-    adresa: "",
-    cnp: "",
-    serie_numar_buletin: "",
-    cetatenie: "",
-    loc_nastere: "",
-    contact_urgent_nume: "",
-    contact_urgent_telefon: "",
-  });
+export default function PatientsPage() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // Fetch patients from API
+  useEffect(() => {
+    axios.get("http://localhost:5000/patients/")
+      .then((res) => setPatients(res.data))
+      .catch((err) => console.error("Error fetching patients:", err));
+  }, []);
 
-  const handleSubmit = async () => {
+  // Function to delete a patient
+  const handleDeletePatient = async (id: number) => {
     try {
-      const response = await axios.post<{ message: string; patientId: number }>(
-        "http://localhost:5000/patients/create",
-        formData,
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      refreshPatients((prevPatients) => [
-        ...prevPatients,
-        { id: response.data.patientId, ...formData },
-      ]);
-
-      closeModal();
+      await axios.delete(`http://localhost:5000/patients/${id}`);
+      setPatients(patients.filter((patient) => patient.id !== id));
     } catch (error) {
-      console.error("Error adding patient:", error);
+      console.error("Error deleting patient:", error);
     }
   };
 
+  //TODO fix this error
   return (
-    <ModalOverlay>
-      <ModalContent>
-        <CloseButton onClick={closeModal}>X</CloseButton>
-        <h3>Add New Patient</h3>
-        <Input name="nume" placeholder="First Name" onChange={handleChange} />
-        <Input name="prenume" placeholder="Last Name" onChange={handleChange} />
-        <Input name="data_nasterii" type="date" placeholder="Date of Birth" onChange={handleChange} />
-        <Input name="gen" placeholder="Gender" onChange={handleChange} />
-        <Input name="telefon" placeholder="Phone" onChange={handleChange} />
-        <Input name="email" placeholder="Email" onChange={handleChange} />
-        <SubmitButton onClick={handleSubmit}>Add Patient</SubmitButton>
-      </ModalContent>
-    </ModalOverlay>
+    <>
+      <Header>
+        <h2>Patients List</h2>
+        <AddPatientButton onClick={() => setModalOpen(true)}>+</AddPatientButton>
+      </Header>
+      <PatientsContainer>
+        {patients.map((patient) => (
+          <PatientCard key={patient.id}>
+            <DeleteButton onClick={() => handleDeletePatient(patient.id)}>-</DeleteButton>
+            <h3>{patient.nume} {patient.prenume}</h3>
+            <p>Birth Date: {patient.data_nasterii}</p>
+            <p>Gender: {patient.gen}</p>
+            <p>Phone: {patient.telefon}</p>
+            <p>Email: {patient.email}</p>
+          </PatientCard>
+        ))}
+      </PatientsContainer>
+      {modalOpen && <PatientModal closeModal={() => setModalOpen(false)} refreshPatients={setPatients} />}
+    </>
   );
 }
