@@ -4,6 +4,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
+import { useRouter } from 'next/navigation';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -67,6 +68,30 @@ const Input = styled.input`
     box-shadow: rgba(75, 163, 195, 0.7) 0px 10px 15px -3px;
   }
 `;
+const PurpleButton = styled.button`
+  display: block;
+  width: 100%;
+  font-weight: bold;
+  font-size: 18px;
+  background: linear-gradient(45deg, #6e48aa 0%, #9d50bb 100%);
+  color: white;
+  padding: 16px;
+  margin-top: 10px;
+  border-radius: 12px;
+  box-shadow: rgba(133, 189, 215, 0.88) 0px 10px 8px -6px;
+  border: none;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: rgba(133, 189, 215, 0.88) 0px 14px 8px -8px;
+  }
+
+  &:active {
+    transform: scale(0.97);
+    box-shadow: rgba(133, 189, 215, 0.88) 0px 10px 6px -6px;
+  }
+`;
 
 const SubmitButton = styled.button`
   display: block;
@@ -124,6 +149,7 @@ interface PatientModalProps {
   initialValues?: Partial<Patient>;
 }
 
+
 export default function PatientModal({ closeModal, refreshPatients, initialValues = {} }: PatientModalProps) {
   const [formData, setFormData] = useState<Omit<Patient, "id">>({
     nume: "",
@@ -178,7 +204,7 @@ export default function PatientModal({ closeModal, refreshPatients, initialValue
       closeModal();
     }
   };
-
+  const router = useRouter();
   return (
     <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent>
@@ -197,6 +223,9 @@ export default function PatientModal({ closeModal, refreshPatients, initialValue
         <Input name="contact_urgent_nume" placeholder="Emergency Contact Name" onChange={handleChange} />
         <Input name="contact_urgent_telefon" placeholder="Emergency Contact Phone" onChange={handleChange} />
         <SubmitButton onClick={handleSubmit}>Adauga Pacient</SubmitButton>
+        <PurpleButton onClick={() => router.push('/camera')}>
+  Capture ID Card
+</PurpleButton>
       </ModalContent>
     </ModalOverlay>
   );

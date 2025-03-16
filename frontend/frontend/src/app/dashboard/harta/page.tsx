@@ -31,48 +31,48 @@ interface GridItemProps {
 
 const Header = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
-  padding: 10px 20px;
   background: rgba(23, 87, 118, 0.9);
   backdrop-filter: blur(10px);
   color: white;
-  border-radius: 0px 12px 12px 0px;
-  box-shadow: 0px 10px 9px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0px 10px 10px rgba(0,0,0,0.2);
   position: sticky;
   top: 0;
   z-index: 1000;
-  font-size: 25px;
-  margin-top: 3.3rem;
-  margin-left: 0.8rem;
+  margin-top: 3.2rem;
+  margin-left: 10rem;
+  font-size:2rem;
 `;
 
-const FloorButton = styled.button<{ floor: string }>`
+const FloorButtonsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const FloorButton = styled.button`
   font-size: 1.5rem;
   width: 60px;
   height: 60px;
-  border-radius: 50%;
-  margin: 5px;
-  border: none;
-  cursor: pointer;
+  margin: 10px 5px;
+  background-color: #4caf50;
   color: white;
-  background-color: ${({ floor }) => {
-    switch (floor) {
-      case 'T':
-        return '#D62839';
-      case 'P':
-        return '#BA324F';
-      case 'E1':
-        return '#175676';
-      case 'E2':
-        return '#4BA3C3';
-      case 'E3':
-        return '#CCE6F4';
-      default:
-        return 'gray';
-    }
-  }};
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #45a049;
+  }
+  
+  &.active {
+    background-color: #333;
+  }
 `;
 
 const GridItem = styled.div<GridItemProps>`
@@ -103,12 +103,17 @@ const GridContainer = styled.div`
   padding: 100px;
   max-width: 80%;
   margin: 0 auto;
+  margin-left:10rem;
+  /* Limita de înălțime și scroll vertical */
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
 `;
 
 export default function HartaSpitalului() {
   const [saloane, setSaloane] = useState<Salon[]>([]);
   const [selectedSalon, setSelectedSalon] = useState<Salon | null>(null);
-  const [selectedFloor, setSelectedFloor] = useState<string | null>(null);
+  // Dacă selectedFloor este null, se vor afișa toate saloanele (butonul T)
+  const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
   const [highestFloor, setHighestFloor] = useState<number>(0);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
@@ -126,6 +131,7 @@ export default function HartaSpitalului() {
         console.error('Error fetching saloane data:', error);
       }
     };
+
     fetchSaloane();
   }, []);
 
@@ -200,38 +206,40 @@ export default function HartaSpitalului() {
     }
   };
 
-  // Logica de filtrare:
-  // Dacă se selectează "T" sau nu se selectează nimic, se afișează toate saloanele.
-  // Dacă se selectează "P", se afișează saloanele cu etaj 0 (Parter).
-  // Dacă se selectează "E1", "E2", etc., se filtrează după numărul extras din label.
-  const filteredSaloane =
-    selectedFloor === 'T' || selectedFloor === null
-      ? saloane
-      : selectedFloor === 'P'
-      ? saloane.filter(salon => salon.etaj === 0)
-      : saloane.filter(salon => salon.etaj === parseInt(selectedFloor.substring(1)));
+  // Dacă selectedFloor este null => afișăm toate saloanele (butonul T activ)
+  const filteredSaloane = selectedFloor !== null
+    ? saloane.filter(salon => salon.etaj === selectedFloor)
+    : saloane;
 
   return (
     <div className="container">
       <Header>
         <h2>Harta Spitalului</h2>
-        <div>
-          <FloorButton floor="T" onClick={() => setSelectedFloor('T')}>T</FloorButton>
-          <FloorButton floor="P" onClick={() => setSelectedFloor('P')}>P</FloorButton>
+        <FloorButtonsContainer>
+          <FloorButton 
+            onClick={() => setSelectedFloor(null)}
+            className={selectedFloor === null ? 'active' : ''}
+          >
+            T
+          </FloorButton>
           {[...Array(highestFloor)].map((_, i) => {
-            const floorLabel = `E${i + 1}`;
+            const floorNumber = i + 1;
             return (
-              <FloorButton key={floorLabel} floor={floorLabel} onClick={() => setSelectedFloor(floorLabel)}>
-                {floorLabel}
+              <FloorButton 
+                key={floorNumber} 
+                onClick={() => setSelectedFloor(floorNumber)}
+                className={selectedFloor === floorNumber ? 'active' : ''}
+              >
+                E{floorNumber}
               </FloorButton>
             );
           })}
-        </div>
+        </FloorButtonsContainer>
       </Header>
 
       <GridContainer>
         {filteredSaloane.map(salon => (
-          <GridItem
+          <GridItem 
             key={salon.id}
             isFull={salon.isFull}
             status={salon.status}
@@ -307,49 +315,31 @@ export default function HartaSpitalului() {
         .container {
           text-align: center;
         }
-        h1 {
-          color: black;
-          font-size: 3rem;
-        }
-        label {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: white;
-          margin-bottom: 30px;
-        }
-        .grid-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-          gap: 40px;
-          justify-content: center;
-          align-items: center;
-          margin-top: 200px;
-          max-width: 80%;
-          margin-left: auto;
-          margin-right: auto;
-        }
         .modal {
           position: fixed;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
+          background-color: rgba(0,0,0,0.5);
           display: flex;
           justify-content: center;
           align-items: center;
         }
         .modal-content {
-          background-color: black;
+          background-color: white;
           padding: 20px;
+          color: black;
           border-radius: 10px;
-          width: 300px;
-          color: white;
+          width: 80%;
+          max-width: 600px;
+          text-align: left;
         }
-        .modal-content label {
+        label {
           display: block;
           margin-top: 10px;
-          color: white;
+          font-size: 1.2rem;
+          font-weight: bold;
         }
         button {
           margin-top: 20px;
@@ -359,13 +349,13 @@ export default function HartaSpitalului() {
           border: none;
           cursor: pointer;
         }
-        .delete-button {
-          margin-left: 10px;
-          background: none;
+        .delete-button, .assign-button {
+          background: transparent;
           border: none;
-          color: red;
-          font-size: 16px;
           cursor: pointer;
+          font-size: 1.5rem;
+          margin-left: 10px;
+          color: red;
         }
       `}</style>
     </div>

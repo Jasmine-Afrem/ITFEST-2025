@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import styled from "styled-components";
-
+import { useRouter } from 'next/navigation';
 interface LoginForm {
   email: string;
   password: string;
@@ -160,6 +160,7 @@ export default function LoginPage() {
   } = useForm<LoginForm>();
 
   const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -170,6 +171,7 @@ export default function LoginPage() {
       localStorage.setItem("user", JSON.stringify(user));
 
       setMessage("Login successful!");
+      router.push("/dashboard");
     } catch (error: any) {
       if (error.response?.status === 401) {
         setMessage("Email sau parola invalida.");
