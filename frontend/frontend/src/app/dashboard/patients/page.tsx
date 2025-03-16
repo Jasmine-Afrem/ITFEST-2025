@@ -469,7 +469,7 @@ useEffect(() => {
           refreshRecords={refreshRecords}
         />
       )}
-
+    
       {showModificaFisa && selectedMedicalRecord && (
         <ModificaFisa
           medicalRecord={selectedMedicalRecord}

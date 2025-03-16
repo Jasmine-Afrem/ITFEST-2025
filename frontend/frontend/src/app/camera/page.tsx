@@ -69,7 +69,9 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
         const extracted = extractData(response.data.text);
         setExtractedData(extracted);
         if (extracted.sex) {
-          router.push(`/dashboard/patients?showModal=true/${extracted.firstName}/${extracted.lastName}/${extracted.birthDate}/${extracted.seria}/${extracted.nr}/${extracted.cnp}/${extracted.nationality}`);
+          router.push(
+            `/dashboard/patients?showModal=true/${extracted.firstName}/${extracted.lastName}/${extracted.birthDate}/${extracted.seria}/${extracted.nr}/${extracted.cnp}/${extracted.nationality}`
+          );
         }
       }
     } catch (error) {
@@ -81,8 +83,9 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
     const extracted = extractData(samplerOCRText);
     setExtractedData(extracted);
     if (extracted.sex) {
-      // Use template literals for URL construction
-      router.push(`/dashboard/patients?showModal=true/${extracted.firstName}/${extracted.lastName}/${extracted.birthDate}/${extracted.seria}/${extracted.nr}/${extracted.cnp}/${extracted.nationality}`);
+      router.push(
+        `/dashboard/patients?showModal=true/${extracted.firstName}/${extracted.lastName}/${extracted.birthDate}/${extracted.seria}/${extracted.nr}/${extracted.cnp}/${extracted.nationality}`
+      );
     }
   };
 
@@ -119,110 +122,122 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh' }}>
-      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ marginRight: '20px', textAlign: 'center' }}>
-          {imageUrl && (
-            <>
-              <h2>Captured Image</h2>
-              <img src={imageUrl} alt="Captured" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '10px' }} />
-            </>
-          )}
-        </div>
-        <div style={{ position: 'relative', textAlign: 'center' }}>
-          <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
-            <button
-              onClick={captureImage}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: 'green',
-                color: 'black',
-                border: 'none',
-                borderRadius: '5px',
-                fontSize: '16px',
-                cursor: 'pointer',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              }}
-            >
-              Capture Image
-            </button>
-          </div>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            width="400px"
-            videoConstraints={{ facingMode: 'user' }}
-            style={{ borderRadius: '10px' }}
-          />
-        </div>
-      </div>
-
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        {imageUrl && (
-          <button
-            onClick={handleImageUpload}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: 'blue',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              marginRight: '10px',
-            }}
-          >
-            Process Image
-          </button>
-        )}
-        <button
-          onClick={handleTestSample}
+    <div
+      style={{
+        display: 'flex',
+        width: '100vw',
+        height: '100vh',
+        background: 'linear-gradient(180deg, #4BA3C3, #175676)',
+      }}
+    >
+      {/* Coloana stângă - panoul pentru scanare și date */}
+      <div
+        style={{
+          width: '600px',
+          margin: '20px',
+          background: '#fff',
+          borderRadius: '15px',
+          padding: '20px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        {/* Elementele webcam - afișare imagine capturată și webcam, una sub alta */}
+        <div
           style={{
-            padding: '10px 20px',
-            backgroundColor: 'purple',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: '8px',
           }}
         >
-          Test Sample Text
-        </button>
+          {imageUrl && (
+            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+              <img
+                src={imageUrl}
+                alt="Captured"
+                style={{
+                  maxWidth: '450px',
+                  maxHeight: '450px',
+                  borderRadius: '10px',
+                }}
+              />
+            </div>
+          )}
+          <div style={{ textAlign: 'center' }}>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              width="500px"
+              videoConstraints={{ facingMode: 'user' }}
+              style={{ borderRadius: '10px' }}
+            />
+          </div>
+        </div>
+
+        {/* Butoanele plasate la final */}
+        <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+          {imageUrl && (
+            <button
+              onClick={handleImageUpload}
+              className="customButton"
+              style={{ marginRight: '20px' }}
+            >
+              Proceseaza Imagine
+            </button>
+          )}
+          <button
+            onClick={handleTestSample}
+            className="customButton"
+            style={{ marginRight: '20px' }}
+          >
+            Test Data
+          </button>
+          <button
+            onClick={captureImage}
+            className="customButton"
+            style={{ marginTop: '20px' }}
+          >
+            Captureaza Imaginea
+          </button>
+        </div>
       </div>
 
-      <div style={{ marginTop: '20px', textAlign: 'center', color: 'black' }}>
-        <h2>Extracted Data</h2>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          <li>
-            <strong>SERIA:</strong> {extractedData.seria || 'Not found'}
-          </li>
-          <li>
-            <strong>NR:</strong> {extractedData.nr || 'Not found'}
-          </li>
-          <li>
-            <strong>CNP:</strong> {extractedData.cnp || 'Not found'}
-          </li>
-          <li>
-            <strong>Last Name:</strong> {extractedData.lastName || 'Not found'}
-          </li>
-          <li>
-            <strong>First Name:</strong> {extractedData.firstName || 'Not found'}
-          </li>
-          <li>
-            <strong>Nationality:</strong> {extractedData.nationality || 'Not found'}
-          </li>
-          <li>
-            <strong>Birth Date:</strong> {extractedData.birthDate || 'Not found'}
-          </li>
-          <li>
-            <strong>Sex:</strong> {extractedData.sex || 'Not found'}
-          </li>
-        </ul>
+      {/* Coloana dreaptă - embed Spline */}
+      <div style={{ flex: 1 }}>
+        <iframe
+          src="https://my.spline.design/dnaparticles-fb2cf219c5ca1e9415ad5045b77e7ada/"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+        ></iframe>
       </div>
+
+      <style jsx>{`
+        .customButton {
+          padding-left: 33px;
+          padding-right: 33px;
+          padding-bottom: 8px;
+          padding-top: 8px;
+          border-radius: 9px;
+          background: #4BA3C3;
+          border: none;
+          font-family: inherit;
+          text-align: center;
+          cursor: pointer;
+          transition: 0.5s;
+        }
+        .customButton:hover {
+          box-shadow: 10px 10px 56px -14px #4BA3C3;
+        }
+        .customButton:active {
+          transform: scale(0.97);
+          box-shadow: 7px 5px 56px -10px #4BA3C3;
+        }
+      `}</style>
     </div>
   );
 };
