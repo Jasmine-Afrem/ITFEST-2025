@@ -22,12 +22,12 @@ const CameraCapturePage = () => {
   const [extractedData, setExtractedData] = useState<ExtractedData>({});
   const webcamRef = useRef<Webcam | null>(null);
 
-  const sampleOCRText = `
+  const samplerOCRText = `
 OUMANIE ROMANT
 CARTE D'IDENTITE
 ROMANIA
-CARTE DE IDENTITATE SERIA XD NR 033695
-CNP 5030922204499
+CARTE DE IDENTITATE SERIA XD NR 492151
+CNP 553952398623
 C6T3T
 IDENTITY CARD
 Nume/Nom/Last name
@@ -78,7 +78,7 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
   };
 
   const handleTestSample = () => {
-    const extracted = extractData(sampleOCRText);
+    const extracted = extractData(samplerOCRText);
     setExtractedData(extracted);
     if (extracted.sex) {
       // Use template literals for URL construction
