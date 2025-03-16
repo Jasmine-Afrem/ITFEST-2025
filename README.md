@@ -3,9 +3,12 @@
 <p align="center">
   <strong>Digitalizarea documentelor medicale din spitalele românești</strong>
 </p>
-![HealthSentinel-Photoroom](https://github.com/user-attachments/assets/fed1231a-52cc-4889-b237-0ce6d46163c1)
+
 
 ## Descriere
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/96139051-2b2e-4fea-964e-8343c0cce552" alt="HealthSentinel-Photoroom" width="150">
+</p>
 
 **HealthSentinel** este o platformă inovatoare care facilitează digitalizarea documentelor medicale, oferind un sistem eficient și accesibil atât pentru personalul medical, cât și pentru pacienți.
 
