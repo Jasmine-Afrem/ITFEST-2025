@@ -225,6 +225,7 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
           border-radius: 9px;
           background: #4BA3C3;
           border: none;
+          
           font-family: inherit;
           text-align: center;
           cursor: pointer;

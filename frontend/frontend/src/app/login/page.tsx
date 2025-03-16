@@ -82,13 +82,14 @@ const Input = styled.input`
   background: #F5F5F5;
   border: 2px solid #CCCCCC;
   padding: 12px;
+  color: #8a8787;
   border-radius: 20px;
   box-shadow: rgba(207, 240, 255, 0.4) 0px 5px 10px -3px;
   font-size: 16px;
   transition: all 0.3s ease-in-out;
 
   &::placeholder {
-    color: rgb(170, 170, 170);
+    color: #8a8787;
   }
 
   &:hover {
@@ -98,6 +99,7 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
+    color: #8a8787;
     border-color: #4BA3C3;
     box-shadow: rgba(75, 163, 195, 0.7) 0px 10px 15px -3px;
   }

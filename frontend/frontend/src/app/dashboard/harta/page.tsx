@@ -43,7 +43,8 @@ const Header = styled.div`
   top: 0;
   z-index: 1000;
   margin-top: 3.2rem;
-  margin-left: 10rem;
+  margin-left: 9rem;
+  margin-right: 7rem;
   font-size:2rem;
 `;
 
@@ -74,24 +75,43 @@ const FloorButton = styled.button`
     background-color: #333;
   }
 `;
-
 const GridItem = styled.div<GridItemProps>`
   padding: 20px;
   margin: 10px;
   text-align: center;
   cursor: pointer;
   border-radius: 10px;
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
+              box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
+              transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   width: 150px;
   height: 150px;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: ${({ isFull, status }) => {
-    if (status === 'In Mentenanta') return 'yellow';
-    return isFull ? 'red' : 'green';
+    if (status === 'In Mentenanta') return '#f7dc5c'; /* Slightly brighter yellow */
+    return isFull ? '#db5151' /* Muted Red */ : '#79c77d'; /* Muted Green */;
   }};
   color: ${({ status }) => (status === 'In Mentenanta' ? 'black' : 'white')};
+
+  /* Add soft shadow based on the status */
+  box-shadow: ${({ isFull, status }) => {
+    if (status === 'In Mentenanta') return '0px 4px 8px rgba(255, 200, 0, 0.4)'; /* Soft yellow shadow */
+    return isFull 
+      ? '0px 4px 10px rgba(219, 81, 81, 0.5)' /* Soft red shadow */
+      : '0px 4px 10px rgba(121, 199, 125, 0.5)'; /* Soft green shadow */
+  }};
+
+  &:hover {
+    box-shadow: ${({ isFull, status }) => {
+      if (status === 'In Mentenanta') return '0px 8px 16px rgba(255, 200, 0, 0.7)'; /* Slightly stronger yellow */
+      return isFull 
+        ? '0px 8px 16px rgba(219, 81, 81, 0.8)' /* Stronger red */
+        : '0px 8px 16px rgba(121, 199, 125, 0.8)'; /* Stronger green */
+    }};
+    transform: translateY(-5px);
+  }
 `;
 
 const GridContainer = styled.div`
@@ -103,11 +123,129 @@ const GridContainer = styled.div`
   padding: 100px;
   max-width: 80%;
   margin: 0 auto;
-  margin-left:10rem;
+  margin-left: 10rem;
+  
   /* Limita de înălțime și scroll vertical */
-  max-height: calc(100vh - 250px);
+  max-height: 65vh;
   overflow-y: auto;
+  
+  /* Background and shadow */
+  background-color: #ededed;
+  border-radius: 12px; /* Rounded corners for a smooth look */
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
 `;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: rgba(255, 255, 255, 0.95); /* Glass effect */
+  backdrop-filter: blur(15px);
+  padding: 30px;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  color: #175676;
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.3s ease-out;
+
+  &.open {
+    transform: scale(1);
+  }
+`;
+
+const ModalTitle = styled.h2`
+  margin-bottom: 10px;
+  font-size: 2rem;
+  color: #175676;
+`;
+
+const ModalLabel = styled.label`
+  display: block;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #333;
+`;
+
+const ModalButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  
+  &.close {
+    background-color: #db5151; /* Muted Red */
+    color: white;
+    
+    &:hover {
+      background-color: #c43c3c;
+    }
+  }
+
+  &.show-patients {
+    background-color: #4caf50; /* Muted Green */
+    color: white;
+
+    &:hover {
+      background-color: #3e8e41;
+    }
+  }
+`;
+
+const PatientList = styled.ul`
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+`;
+
+const PatientItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+`;
+
+const ActionButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  margin-left: 10px;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &.delete {
+    color: red;
+  }
+
+  &.assign {
+    color: #4caf50;
+  }
+`;
+
 
 export default function HartaSpitalului() {
   const [saloane, setSaloane] = useState<Salon[]>([]);

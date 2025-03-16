@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import styled from "styled-components";
+import Image from "next/image";
 import axios from "axios";
 import PatientModal from "../components/PatientModal";
 import AdaugaFisa from "../../butoane/adaugafisa";
@@ -113,19 +114,75 @@ const PatientsContainer = styled.div`
   margin-right: 3rem;
 `;
 
-const PatientCard = styled.div`
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
+const PatientCard = styled.div<{ isSelected: boolean }>`
+  background: ${(props) => (props.isSelected ? "#e0f2fe" : "white")};
+  padding: 20px;
+  border-radius: 12px;
   margin-bottom: 15px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-  position: relative;
-  transition: transform 0.2s ease-in-out;
-  color: black;
-
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  
   &:hover {
-    transform: translateY(-3px);
+    background: #f0f9ff;
+    transform: translateY(-2px);
   }
+`;
+
+const PatientTop = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 15px;
+`;
+
+const PatientInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 20px;
+  flex-grow: 1;
+  margin-left: 1rem;
+  max-width: 16rem;
+`;
+
+const Info = styled.div`
+  background-color: #f0f4f7;
+  border-radius: 12px;
+  max-width: auto;
+  padding-left: 1rem;
+
+  /* Adding a black box-shadow */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+`;
+
+const PatientName = styled.h3`
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-left: 0.4rem;
+  margin-bottom: 0.3rem;
+`;
+
+const PatientField = styled.p`
+  margin: 2px 0;
+  font-size: 14px;
+  color: #555;
+`;
+
+const PatientButtonsContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 2rem;
+  width: 100%;
+  justify-content: center;
+  margin-left: 20rem;
+  position: absolute;
+;
 `;
 
 const FilterSidebar = styled.div`
@@ -157,22 +214,17 @@ const FilterInput = styled.input`
   border: 1px solid #ccc;
 `;
 
-const PatientButtonsContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-`;
-
 const ButtonBase = styled.button`
-  padding: 12px 20px;
-  border-radius: 6px;
-  font-size: 16px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  font-size: 14px;
   border: none;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 120px;
 
   &:hover {
     transform: scale(1.05);
@@ -188,21 +240,21 @@ const OrangeButton = styled(ButtonBase)`
   }
 `;
 
-const GreenButton = styled(ButtonBase)`
-  background: #10b981;
-  color: white;
-
-  &:hover {
-    background: #059669;
-  }
-`;
-
 const BlueButton = styled(ButtonBase)`
   background: #3b82f6;
   color: white;
 
   &:hover {
     background: #2563eb;
+  }
+`;
+
+const GreenButton = styled(ButtonBase)`
+  background: #10b981;
+  color: white;
+
+  &:hover {
+    background: #059669;
   }
 `;
 
@@ -253,6 +305,24 @@ const AnalysisCard = styled.div`
   position: relative;
 `;
 
+// Noi componente pentru afișarea câmpurilor într-un container orizontal
+const FieldsContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+`;
+
+const FieldBox = styled.div`
+  background: #f3f4f6;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+`;
+
 interface Patient {
   id: number;
   nume: string;
@@ -272,14 +342,14 @@ interface MedicalRecord {
   reteta: string;
   analyses?: Analysis[];
 }
-interface PatientData{
-  firstName : string;
-  lastName : string;
-  birthDate : string;
+interface PatientData {
+  firstName: string;
+  lastName: string;
+  birthDate: string;
   seria: string;
-  nr : string;
-  cnp : string;
-  nationality : string;
+  nr: string;
+  cnp: string;
+  nationality: string;
 }
 
 interface Analysis {
@@ -300,7 +370,7 @@ export default function PatientsPage() {
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
   const [selectedMedicalRecord, setSelectedMedicalRecord] = useState<MedicalRecord | null>(null);
   const searchParams = useSearchParams();
-  console.log(searchParams)
+  console.log(searchParams);
 
   // State-uri pentru componentele externe
   const [showAdaugaFisa, setShowAdaugaFisa] = useState(false);
@@ -325,46 +395,43 @@ export default function PatientsPage() {
       axios
         .get(`http://localhost:5000/medicalrecords?pacientId=${selectedPatient.id}`)
         .then((res) => setMedicalRecords(res.data))
-        .catch((err) =>
-          console.error("Error fetching medical records:", err)
-        );
+        .catch((err) => console.error("Error fetching medical records:", err));
     }
   };
 
- // In your PatientsPage component
-useEffect(() => {
-  const showModalParam = searchParams.get('showModal');
-  
-  if (showModalParam) {
-    const [modalFlag, ...paramsArray] = showModalParam.split('/');
+  // In your PatientsPage component
+  useEffect(() => {
+    const showModalParam = searchParams.get('showModal');
     
-    if (modalFlag === 'true') {
-      const [
-        firstName,
-        lastName,
-        birthDate,
-        seria,
-        nr,
-        cnp,
-        nationality
-      ] = paramsArray;
+    if (showModalParam) {
+      const [modalFlag, ...paramsArray] = showModalParam.split('/');
+      
+      if (modalFlag === 'true') {
+        const [
+          firstName,
+          lastName,
+          birthDate,
+          seria,
+          nr,
+          cnp,
+          nationality
+        ] = paramsArray;
 
-      setInitialFormData({
-        firstName: firstName || '', // Map firstName to prenume
-        lastName: lastName || '',     // Map lastName to nume
-        birthDate: birthDate || '',
-        seria: seria ,
-        nr: nr || '',
-        cnp: cnp || '',
-        nationality: nationality || '',
-      });
+        setInitialFormData({
+          firstName: firstName || '',
+          lastName: lastName || '',
+          birthDate: birthDate || '',
+          seria: seria,
+          nr: nr || '',
+          cnp: cnp || '',
+          nationality: nationality || '',
+        });
 
-      setModalOpen(true);
+        setModalOpen(true);
+      }
     }
-  }
-  refreshPatients();
-}, [searchParams]);
-
+    refreshPatients();
+  }, [searchParams]);
 
   const filteredPatients = patients.filter((p) => {
     const searchField =
@@ -388,33 +455,53 @@ useEffect(() => {
 
       <MainContent>
         <PatientsContainer>
-          {filteredPatients.map((patient) => (
-            <PatientCard key={patient.id} onClick={() => handlePatientClick(patient)}>
-              <h3>
-                {patient.nume} {patient.prenume}
-              </h3>
-              <p>🗓️ Data Nașterii: {patient.data_nasterii}</p>
-              <p>⚧ Sex: {patient.gen}</p>
-              <p>📞 Telefon: {patient.telefon}</p>
-              <p>✉️ Email: {patient.email}</p>
-              {selectedPatient?.id === patient.id && (
-                <PatientButtonsContainer>
-                  <OrangeButton onClick={() => setShowAdaugaFisa(true)}>
-                  📝 Creare Fișă Nouă
-                  </OrangeButton>
-                  <BlueButton onClick={() => setShowVizualizareDetaliata(true)}>
-                    🔍 Vizualizare
-                  </BlueButton>
-                  <GreenButton onClick={() => setShowExternare(true)}>
-                    🚪 Externare
-                  </GreenButton>
-                  <RedButton onClick={() => setShowStergePacient(true)}>
-                    🗑 Ștergere
-                  </RedButton>
-                </PatientButtonsContainer>
-              )}
-            </PatientCard>
-          ))}
+        {filteredPatients.map((patient) => (
+          <PatientCard 
+            key={patient.id} 
+            isSelected={selectedPatient?.id === patient.id}
+            onClick={() => handlePatientClick(patient)}
+          >
+            <PatientTop>
+              <Image 
+                src="/blue_pic.png" 
+                alt="Profile" 
+                width={60} 
+                height={60} 
+                style={{ 
+                  borderRadius: "50%", 
+                  border: "1px solid #175676",
+                  boxShadow: "rgba(75, 163, 195, 0.5) 0px 5px 15px" 
+                }} 
+              />
+              <PatientInfo>
+                <PatientName>{patient.nume} {patient.prenume}</PatientName>
+                <Info>
+                  <PatientField>Sex: {patient.gen}</PatientField>
+                  <PatientField>Data Nașterii: {patient.data_nasterii}</PatientField>
+                  <PatientField>Telefon: {patient.telefon}</PatientField>
+                  <PatientField>Email: {patient.email}</PatientField>
+                </Info>
+              </PatientInfo>
+            </PatientTop>
+
+            {selectedPatient?.id === patient.id && (
+              <PatientButtonsContainer>
+                <OrangeButton onClick={(e) => { e.stopPropagation(); setShowAdaugaFisa(true); }}>
+                  📝 Creare Fișă
+                </OrangeButton>
+                <BlueButton onClick={(e) => { e.stopPropagation(); setShowVizualizareDetaliata(true); }}>
+                  🔍 Vizualizare
+                </BlueButton>
+                <GreenButton onClick={(e) => { e.stopPropagation(); setShowExternare(true); }}>
+                  🚪 Externare
+                </GreenButton>
+                <RedButton onClick={(e) => { e.stopPropagation(); setShowStergePacient(true); }}>
+                  🗑 Ștergere
+                </RedButton>
+              </PatientButtonsContainer>
+            )}
+          </PatientCard>
+        ))}
         </PatientsContainer>
 
         {filterOpen && (
@@ -439,7 +526,6 @@ useEffect(() => {
         )}
       </MainContent>
 
-     
       <Overlay
         isVisible={
           showAdaugaFisa ||
@@ -469,7 +555,7 @@ useEffect(() => {
           refreshRecords={refreshRecords}
         />
       )}
-    
+
       {showModificaFisa && selectedMedicalRecord && (
         <ModificaFisa
           medicalRecord={selectedMedicalRecord}
@@ -515,24 +601,22 @@ useEffect(() => {
           onClose={() => setShowStergePacient(false)}
           refreshPatients={refreshPatients}
         />
-      )}v
+      )}
 
-
-
-{modalOpen && (
-  <PatientModal 
-    closeModal={() => setModalOpen(false)} 
-    refreshPatients={refreshPatients}
-    initialValues={{
-      prenume: initialFormData?.firstName || '',
-      nume: initialFormData?.lastName || '',
-      data_nasterii: initialFormData?.birthDate || '',
-      serie_numar_buletin: `${initialFormData?.seria || ''} ${initialFormData?.nr || ''}`.trim(),
-      cnp: initialFormData?.cnp || '',
-      cetatenie: initialFormData?.nationality || ''
-    }}
-  />
-)}
+      {modalOpen && (
+        <PatientModal 
+          closeModal={() => setModalOpen(false)} 
+          refreshPatients={refreshPatients}
+          initialValues={{
+            prenume: initialFormData?.firstName || '',
+            nume: initialFormData?.lastName || '',
+            data_nasterii: initialFormData?.birthDate || '',
+            serie_numar_buletin: `${initialFormData?.seria || ''} ${initialFormData?.nr || ''}`.trim(),
+            cnp: initialFormData?.cnp || '',
+            cetatenie: initialFormData?.nationality || ''
+          }}
+        />
+      )}
     </PageContainer>
   );
 }
