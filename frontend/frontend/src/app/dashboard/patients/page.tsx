@@ -5,17 +5,25 @@ import { useState, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import PatientModal from "../components/PatientModal";
+import AdaugaFisa from "../../butoane/adaugafisa";
+import ModificaFisa from "../../butoane/modificafisa";
+import AdaugaAnaliza from "../../butoane/adaugaanaliza";
+import ModificaAnaliza from "../../butoane/modificaanaliza";
+import Externare from "../../butoane/externare";
+import VizualizareDetaliataPacient from "../../butoane/vizualizaredetaliatapacient";
+import StergePacient from "../../butoane/stergepacient";
+import { useSearchParams } from 'next/navigation';
 
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  max-width: 1400px;
+  max-width: 1500px;
   margin: auto;
   height: 100vh;
   overflow: hidden;
-  position: relative; /* Important pentru poziționarea overlay-ului */
+  position: relative;
 `;
 
 const Header = styled.div`
@@ -24,7 +32,8 @@ const Header = styled.div`
   align-items: center;
   width: 100%;
   padding: 10px 20px;
-  background: #175676;
+  background: rgba(23, 87, 118, 0.9); /* Glass effect */
+  backdrop-filter: blur(10px);
   color: white;
   border-radius: 12px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -48,6 +57,8 @@ const AddPatientButton = styled.button`
   background: #3b82f6;
   color: white;
   font-size: 30px;
+  position: relative;
+  top: -8px;
   border: none;
   cursor: pointer;
   display: flex;
@@ -68,6 +79,8 @@ const EditPatientsButton = styled.button`
   background: #f59e0b;
   color: white;
   font-size: 24px;
+  position: relative;
+  top: -8px;
   border: none;
   cursor: pointer;
   display: flex;
@@ -96,7 +109,7 @@ const PatientsContainer = styled.div`
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
   height: calc(100vh - 100px);
   overflow-y: auto;
-  max-height: 72vh;
+  max-height: 69vh;
   margin-right: 3rem;
 `;
 
@@ -147,6 +160,7 @@ const FilterInput = styled.input`
 const PatientButtonsContainer = styled.div`
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 `;
 
 const ButtonBase = styled.button`
@@ -175,15 +189,13 @@ const OrangeButton = styled(ButtonBase)`
 `;
 
 const GreenButton = styled(ButtonBase)`
-  background: gr;
+  background: #10b981;
   color: white;
 
   &:hover {
-    background: #d97706;
+    background: #059669;
   }
 `;
-
-
 
 const BlueButton = styled(ButtonBase)`
   background: #3b82f6;
@@ -194,39 +206,13 @@ const BlueButton = styled(ButtonBase)`
   }
 `;
 
-const FormPopup = styled.div`
-  color: black;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  width: 500px;
-  height: 500px;
-  overflow-y: auto;
-`;
+const RedButton = styled(ButtonBase)`
+  background: #ef4444;
+  color: white;
 
-const FormTitle = styled.h3`
-  margin-bottom: 20px;
-`;
-
-const FormInput = styled.input`
-  color: black;
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-`;
-
-const FormButtonsContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  &:hover {
+    background: #dc2626;
+  }
 `;
 
 const Overlay = styled.div<{ isVisible: boolean }>`
@@ -240,7 +226,6 @@ const Overlay = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? "block" : "none")};
 `;
 
-/* Noi componente pentru afișarea fișelor medicale și a analizelor */
 const MedicalRecordsContainer = styled.div`
   margin-top: 20px;
   width: 100%;
@@ -265,6 +250,7 @@ const AnalysisCard = styled.div`
   border-radius: 8px;
   margin-top: 10px;
   border: 1px solid #d1d5db;
+  position: relative;
 `;
 
 interface Patient {
@@ -286,6 +272,15 @@ interface MedicalRecord {
   reteta: string;
   analyses?: Analysis[];
 }
+interface PatientData{
+  firstName : string;
+  lastName : string;
+  birthDate : string;
+  seria: string;
+  nr : string;
+  cnp : string;
+  nationality : string;
+}
 
 interface Analysis {
   id: number;
@@ -302,90 +297,83 @@ export default function PatientsPage() {
   const [filter, setFilter] = useState("");
   const [filterType, setFilterType] = useState<keyof Patient>("nume");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [showForm, setShowForm] = useState(false); // Pentru crearea fișei medicale
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
-  const [showAnalysisForm, setShowAnalysisForm] = useState(false);
   const [selectedMedicalRecord, setSelectedMedicalRecord] = useState<MedicalRecord | null>(null);
+  const searchParams = useSearchParams();
+  console.log(searchParams)
 
-  // Preia toți pacienții
-  useEffect(() => {
+  // State-uri pentru componentele externe
+  const [showAdaugaFisa, setShowAdaugaFisa] = useState(false);
+  const [showModificaFisa, setShowModificaFisa] = useState(false);
+  const [showAdaugaAnaliza, setShowAdaugaAnaliza] = useState(false);
+  const [showModificaAnaliza, setShowModificaAnaliza] = useState(false);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<Analysis | null>(null);
+  const [showVizualizareDetaliata, setShowVizualizareDetaliata] = useState(false);
+  const [showExternare, setShowExternare] = useState(false);
+  const [showStergePacient, setShowStergePacient] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<PatientData | null>(null);
+
+  const refreshPatients = () => {
     axios
       .get("http://localhost:5000/patients/")
       .then((res) => setPatients(res.data))
       .catch((err) => console.error("Error fetching patients:", err));
-  }, []);
+  };
 
-  // Când se selectează un pacient, preia fișele medicale aferente
-  useEffect(() => {
+  const refreshRecords = () => {
     if (selectedPatient) {
       axios
         .get(`http://localhost:5000/medicalrecords?pacientId=${selectedPatient.id}`)
         .then((res) => setMedicalRecords(res.data))
-        .catch((err) => console.error("Error fetching medical records:", err));
+        .catch((err) =>
+          console.error("Error fetching medical records:", err)
+        );
     }
-  }, [selectedPatient]);
+  };
+
+ // In your PatientsPage component
+useEffect(() => {
+  const showModalParam = searchParams.get('showModal');
+  
+  if (showModalParam) {
+    const [modalFlag, ...paramsArray] = showModalParam.split('/');
+    
+    if (modalFlag === 'true') {
+      const [
+        firstName,
+        lastName,
+        birthDate,
+        seria,
+        nr,
+        cnp,
+        nationality
+      ] = paramsArray;
+
+      setInitialFormData({
+        firstName: firstName || '', // Map firstName to prenume
+        lastName: lastName || '',     // Map lastName to nume
+        birthDate: birthDate || '',
+        seria: seria ,
+        nr: nr || '',
+        cnp: cnp || '',
+        nationality: nationality || '',
+      });
+
+      setModalOpen(true);
+    }
+  }
+  refreshPatients();
+}, [searchParams]);
+
 
   const filteredPatients = patients.filter((p) => {
-    const searchField = filterType === "nume" ? `${p.nume} ${p.prenume}` : p[filterType];
+    const searchField =
+      filterType === "nume" ? `${p.nume} ${p.prenume}` : p[filterType];
     return searchField.toLowerCase().includes(filter.toLowerCase());
   });
 
   const handlePatientClick = (patient: Patient) => {
     setSelectedPatient(patient);
-  };
-
-  // Formular pentru crearea fișei medicale
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const medicalRecord = {
-      id_pacient: selectedPatient?.id,
-      id_medic: 5, // Se presupune că ID-ul medicului logat este 3
-      diagnostic: (e.target as any).diagnostic.value,
-      tratament: (e.target as any).tratament.value,
-      reteta: (e.target as any).reteta.value,
-    };
-
-    axios
-      .post("http://localhost:5000/medicalrecords/add", medicalRecord)
-      .then((res) => {
-        alert(res.data.message);
-        setShowForm(false);
-        // Reîmprospătăm fișele medicale
-        if (selectedPatient) {
-          axios
-            .get(`http://localhost:5000/medicalrecords/?pacientId=${selectedPatient.id}`)
-            .then((res) => setMedicalRecords(res.data))
-            .catch((err) => console.error("Error fetching medical records:", err));
-        }
-      })
-      .catch((err) => console.error("Error adding medical record:", err));
-  };
-
-  // Formular pentru adăugarea unei analize la o fișă medicală
-  const handleAnalysisSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedMedicalRecord) return;
-    const analysisData = {
-      id_fisa_medicala: selectedMedicalRecord.id,
-      tip_analiza: (e.target as any).tip_analiza.value,
-      rezultat: (e.target as any).rezultat.value,
-      data_analiza: (e.target as any).data_analiza.value,
-    };
-
-    axios
-      .post("http://localhost:5000/medicalrecords/analize/add", analysisData)
-      .then((res) => {
-        alert(res.data.message);
-        setShowAnalysisForm(false);
-        // Reîmprospătăm fișele medicale pentru a actualiza analizele
-        if (selectedPatient) {
-          axios
-            .get(`http://localhost:5000/medicalrecords?pacientId=${selectedPatient.id}`)
-            .then((res) => setMedicalRecords(res.data))
-            .catch((err) => console.error("Error fetching medical records:", err));
-        }
-      })
-      .catch((err) => console.error("Error adding analysis:", err));
   };
 
   return (
@@ -405,15 +393,24 @@ export default function PatientsPage() {
               <h3>
                 {patient.nume} {patient.prenume}
               </h3>
-              <p>📅 Data Nașterii: {patient.data_nasterii}</p>
+              <p>🗓️ Data Nașterii: {patient.data_nasterii}</p>
               <p>⚧ Sex: {patient.gen}</p>
               <p>📞 Telefon: {patient.telefon}</p>
-              <p>✉ Email: {patient.email}</p>
+              <p>✉️ Email: {patient.email}</p>
               {selectedPatient?.id === patient.id && (
                 <PatientButtonsContainer>
-                  <OrangeButton onClick={() => setShowForm(true)}>
-                    ✏️ Creare Fişă Nouă
+                  <OrangeButton onClick={() => setShowAdaugaFisa(true)}>
+                  📝 Creare Fișă Nouă
                   </OrangeButton>
+                  <BlueButton onClick={() => setShowVizualizareDetaliata(true)}>
+                    🔍 Vizualizare
+                  </BlueButton>
+                  <GreenButton onClick={() => setShowExternare(true)}>
+                    🚪 Externare
+                  </GreenButton>
+                  <RedButton onClick={() => setShowStergePacient(true)}>
+                    🗑 Ștergere
+                  </RedButton>
                 </PatientButtonsContainer>
               )}
             </PatientCard>
@@ -442,106 +439,100 @@ export default function PatientsPage() {
         )}
       </MainContent>
 
-      {/* Afișăm fișele medicale și analizele aferente dacă avem un pacient selectat */}
-      {selectedPatient && (
-        <MedicalRecordsContainer>
-          <h3>
-            Fişe Medicale pentru {selectedPatient.nume} {selectedPatient.prenume}
-          </h3>
-          {medicalRecords.map((record) => (
-            <MedicalRecordCard key={record.id}>
-              <p>
-                <strong>Diagnostic:</strong> {record.diagnostic}
-              </p>
-              <p>
-                <strong>Tratament:</strong> {record.tratament}
-              </p>
-              <p>
-                <strong>Reţetă:</strong> {record.reteta}
-              </p>
-              <BlueButton
-                onClick={() => {
-                  setSelectedMedicalRecord(record);
-                  setShowAnalysisForm(true);
-                }}
-              >
-                ➕ Adaugă Analiză
-              </BlueButton>
-              {record.analyses && record.analyses.length > 0 && (
-                <div>
-                  <h4>Analize:</h4>
-                  {record.analyses.map((analysis) => (
-                    <AnalysisCard key={analysis.id}>
-                      <p>
-                        <strong>Tip Analiză:</strong> {analysis.tip_analiza}
-                      </p>
-                      <p>
-                        <strong>Rezultat:</strong> {analysis.rezultat}
-                      </p>
-                      <p>
-                        <strong>Data Analiză:</strong> {analysis.data_analiza}
-                      </p>
-                    </AnalysisCard>
-                  ))}
-                </div>
-              )}
-            </MedicalRecordCard>
-          ))}
-        </MedicalRecordsContainer>
-      )}
-
-      {/* Overlay comun pentru formulare */}
+     
       <Overlay
-        isVisible={showForm || showAnalysisForm}
+        isVisible={
+          showAdaugaFisa ||
+          showModificaFisa ||
+          showAdaugaAnaliza ||
+          showModificaAnaliza ||
+          showVizualizareDetaliata ||
+          showExternare ||
+          showStergePacient
+        }
         onClick={() => {
-          setShowForm(false);
-          setShowAnalysisForm(false);
+          setShowAdaugaFisa(false);
+          setShowModificaFisa(false);
+          setShowAdaugaAnaliza(false);
+          setShowModificaAnaliza(false);
+          setShowVizualizareDetaliata(false);
+          setShowExternare(false);
+          setShowStergePacient(false);
         }}
       />
 
-      {/* Formular pentru crearea fișei medicale */}
-      {showForm && (
-        <FormPopup>
-          <FormTitle>Creare Fişă Medicală</FormTitle>
-          <form onSubmit={handleFormSubmit}>
-            <label>Diagnostic:</label>
-            <FormInput name="diagnostic" required />
-            <label>Tratament:</label>
-            <FormInput name="tratament" required />
-            <label>Reţetă:</label>
-            <FormInput name="reteta" required />
-            <FormButtonsContainer>
-              <BlueButton type="submit">Salvează Fișa</BlueButton>
-              <OrangeButton type="button" onClick={() => setShowForm(false)}>
-                Anulează
-              </OrangeButton>
-            </FormButtonsContainer>
-          </form>
-        </FormPopup>
+      {/* Componente externe */}
+      {showAdaugaFisa && selectedPatient && (
+        <AdaugaFisa
+          selectedPatient={selectedPatient}
+          onClose={() => setShowAdaugaFisa(false)}
+          refreshRecords={refreshRecords}
+        />
       )}
 
-      {/* Formular pentru adăugarea unei analize la o fișă medicală */}
-      {showAnalysisForm && (
-        <FormPopup>
-          <FormTitle>Adaugă Analiză</FormTitle>
-          <form onSubmit={handleAnalysisSubmit}>
-            <label>Tip Analiză:</label>
-            <FormInput name="tip_analiza" required />
-            <label>Rezultat:</label>
-            <FormInput name="rezultat" required />
-            <label>Data Analiză:</label>
-            <FormInput name="data_analiza" type="date" required />
-            <FormButtonsContainer>
-              <BlueButton type="submit">Salvează Analiza</BlueButton>
-              <OrangeButton type="button" onClick={() => setShowAnalysisForm(false)}>
-                Anulează
-              </OrangeButton>
-            </FormButtonsContainer>
-          </form>
-        </FormPopup>
+      {showModificaFisa && selectedMedicalRecord && (
+        <ModificaFisa
+          medicalRecord={selectedMedicalRecord}
+          onClose={() => setShowModificaFisa(false)}
+          refreshRecords={refreshRecords}
+        />
       )}
 
-      {modalOpen && <PatientModal onClose={() => setModalOpen(false)} />}
+      {showAdaugaAnaliza && selectedMedicalRecord && (
+        <AdaugaAnaliza
+          id_fisa_medicala={selectedMedicalRecord.id}
+          onClose={() => setShowAdaugaAnaliza(false)}
+          refreshAnalyses={refreshRecords}
+        />
+      )}
+
+      {showModificaAnaliza && selectedAnalysis && (
+        <ModificaAnaliza
+          analysis={selectedAnalysis}
+          onClose={() => setShowModificaAnaliza(false)}
+          refreshAnalyses={refreshRecords}
+        />
+      )}
+
+      {showVizualizareDetaliata && selectedPatient && (
+        <VizualizareDetaliataPacient
+          patientId={selectedPatient.id}
+          onClose={() => setShowVizualizareDetaliata(false)}
+        />
+      )}
+
+      {showExternare && selectedPatient && (
+        <Externare
+          patient={selectedPatient}
+          onClose={() => setShowExternare(false)}
+          refreshPatient={refreshPatients}
+        />
+      )}
+
+      {showStergePacient && selectedPatient && (
+        <StergePacient
+          patient={selectedPatient}
+          onClose={() => setShowStergePacient(false)}
+          refreshPatients={refreshPatients}
+        />
+      )}v
+
+
+
+{modalOpen && (
+  <PatientModal 
+    closeModal={() => setModalOpen(false)} 
+    refreshPatients={refreshPatients}
+    initialValues={{
+      prenume: initialFormData?.firstName || '',
+      nume: initialFormData?.lastName || '',
+      data_nasterii: initialFormData?.birthDate || '',
+      serie_numar_buletin: `${initialFormData?.seria || ''} ${initialFormData?.nr || ''}`.trim(),
+      cnp: initialFormData?.cnp || '',
+      cetatenie: initialFormData?.nationality || ''
+    }}
+  />
+)}
     </PageContainer>
   );
 }

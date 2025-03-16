@@ -6,9 +6,9 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 
 const SidebarContainer = styled(motion.div)`
-  width: 260px;
+  width: 270px;
   height: 80vh;
-  background: rgba(23, 87, 118, 0.9); /* Glass effect */
+  background: rgba(23, 87, 118, 0.9);
   backdrop-filter: blur(10px);
   color: white;
   padding: 20px;
@@ -21,21 +21,13 @@ const SidebarContainer = styled(motion.div)`
   top: 6vh;
   border-radius: 20px;
   transition: all 0.3s ease-in-out;
-  z-index:2;
+  z-index: 2;
+
   @media (max-width: 768px) {
     width: 220px;
     left: 1vh;
     top: 5vh;
   }
-`;
-
-const LogoContainer = styled.div`
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  width: 100%;
-  display: flex;
-  justify-content: center;
 `;
 
 const SidebarMenu = styled.div`
@@ -44,12 +36,14 @@ const SidebarMenu = styled.div`
   align-items: center;
   width: 100%;
   flex-grow: 1.1;
-  gap: 20px; /* Reduce space between items */
+  gap: 20px;
   margin-top: 30px;
 `;
 
-const SidebarItem = styled(motion.a)`
-  display: inline-block;
+const SidebarItem = styled(motion.div)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 12px;
   cursor: pointer;
   font-size: 1rem;
@@ -57,8 +51,14 @@ const SidebarItem = styled(motion.a)`
   color: white;
   text-decoration: none;
   position: relative;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+  }
 
   &::after {
     content: "";
@@ -78,7 +78,6 @@ const SidebarItem = styled(motion.a)`
   }
 `;
 
-
 export default function Sidebar() {
   return (
     <SidebarContainer
@@ -86,35 +85,42 @@ export default function Sidebar() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
-      <LogoContainer>
-        <Image src="/HealthSentinel-Photoroom.png" alt="HealthSentinel Logo" width={300} height={250} />
-      </LogoContainer>
+      <Image
+        src="/HealthSentinel-Photoroom.png"
+        alt="HealthSentinel Logo"
+        width={200}
+        height={150}
+        priority
+      />
 
       <SidebarMenu>
-        <Link href="/dashboard" passHref>
-          <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            Dashboard
-          </SidebarItem>
+        <Link href="/dashboard" legacyBehavior>
+          <a>
+            <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              Dashboard
+            </SidebarItem>
+          </a>
         </Link>
-        <Link href="/dashboard/patients" passHref>
-          <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            Pacienti
-          </SidebarItem>
+        <Link href="/dashboard/patients" legacyBehavior>
+          <a>
+            <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              Pacienti
+            </SidebarItem>
+          </a>
         </Link>
-        <Link href="/dashboard/harta" passHref>
-          <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            Saloane
-          </SidebarItem>
+        <Link href="/dashboard/harta" legacyBehavior>
+          <a>
+            <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              Saloane
+            </SidebarItem>
+          </a>
         </Link>
-        <Link href="/settings" passHref>
-          <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            Setari
-          </SidebarItem>
-        </Link>
-        <Link href="/logout" passHref>
-          <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            Logout
-          </SidebarItem>
+        <Link href="/logout" legacyBehavior>
+          <a>
+            <SidebarItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              Logout
+            </SidebarItem>
+          </a>
         </Link>
       </SidebarMenu>
     </SidebarContainer>

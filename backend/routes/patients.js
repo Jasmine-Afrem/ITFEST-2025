@@ -17,6 +17,58 @@ router.get("/", (req, res) => {
   });
 });
 
+// Get full patient data by ID
+router.get("/databyid/:id", (req, res) => {
+  const patientId = req.params.id;
+
+  // Query pentru informațiile pacientului
+  const patientQuery = `
+    SELECT * FROM pacienti WHERE id = ?
+  `;
+
+  // Query pentru fișele medicale
+  const medicalRecordsQuery = `
+    SELECT * FROM fise_medicale WHERE id_pacient = ?
+  `;
+
+  // Query pentru analizele medicale
+  const medicalTestsQuery = `
+    SELECT am.* 
+    FROM analize_medicale am
+    JOIN fise_medicale fm ON am.id_fisa_medicala = fm.id
+    WHERE fm.id_pacient = ?
+  `;
+
+  // Query pentru contactele de urgență
+  const emergencyContactsQuery = `
+    SELECT * FROM contacte_urgenta WHERE id_pacient = ?
+  `;
+
+  db.query(patientQuery, [patientId], (err, patientResults) => {
+    if (err) return res.status(500).json({ error: "Server error", details: err });
+    if (patientResults.length === 0) return res.status(404).json({ error: "Pacientul nu a fost găsit" });
+
+    db.query(medicalRecordsQuery, [patientId], (err, recordsResults) => {
+      if (err) return res.status(500).json({ error: "Server error", details: err });
+
+      db.query(medicalTestsQuery, [patientId], (err, testsResults) => {
+        if (err) return res.status(500).json({ error: "Server error", details: err });
+
+        db.query(emergencyContactsQuery, [patientId], (err, contactsResults) => {
+          if (err) return res.status(500).json({ error: "Server error", details: err });
+
+          res.json({
+            pacient: patientResults[0],
+            fise_medicale: recordsResults,
+            analize_medicale: testsResults,
+            contacte_urgenta: contactsResults
+          });
+        });
+      });
+    });
+  });
+});
+
 // Search Patients Not in a Room
 router.get("/not-in-room", (req, res) => {
   const query = `

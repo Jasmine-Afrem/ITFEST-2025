@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import styled from "styled-components";
 
 const DashboardContainer = styled.div`
@@ -10,10 +11,10 @@ const DashboardContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 99%;
+  width: 98%;
   position: relative;
   border-radius: 20px;
-  margin: 2.9rem 1rem 5rem;
+  margin: 2.8rem 2rem 8rem;
 `;
 
 /* Date & Time - Top Left Corner */
@@ -25,7 +26,7 @@ const DateContainer = styled.div`
   font-weight: 500;
   color: #175676;
   padding: 10px 15px;
-  background-color: #ffffff;
+  background-color: #ededed;
   border-radius: 10px;
   box-shadow: rgba(23, 87, 118, 0.2) 3px 6px 12px;
 `;
@@ -91,12 +92,11 @@ const ProfileSection = styled(InfoBox)`
   align-items: center;
 `;
 
-const LargeProfileImage = styled.img`
-  width: 180px;
-  height: 180px;
+const LargeProfileImage = styled(Image)`
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #175676;
+  background-color: #175676;
 `;
 
 const ProfileDescription = styled.div`
@@ -114,9 +114,7 @@ const BadgesSection = styled(InfoBox)`
   align-items: center;
 `;
 
-const BadgeImage = styled.img`
-  width: 50%;
-  height: auto;
+const BadgeImage = styled(Image)`
   object-fit: contain;
 `;
 
@@ -182,7 +180,7 @@ export default function DashboardPage() {
 
       {/* Profile info in the top-right corner */}
       <ProfileContainer>
-        <img src="/def_picture.png" alt="Profile" style={{ width: "50px", height: "50px", borderRadius: "50%" }} />
+        <Image src="/def_picture.png" alt="Profile" width={50} height={50} style={{ borderRadius: "50%" }} />
         <div>
           <span style={{ fontSize: "18px", fontWeight: "bold" }}>John Doe</span>
           <br />
@@ -194,15 +192,15 @@ export default function DashboardPage() {
       <GridWrapper>
         {/* Top Row: Profile & Badges */}
         <ProfileSection>
-          <LargeProfileImage src="/def_picture.png" alt="Profile" />
+          <LargeProfileImage src="/def_picture.png" alt="Profile" width={180} height={180} />
           <ProfileDescription>
-            This is a placeholder text about the user. You can add details about John Doe here.
+            Medic Rezident at Central Health Clinic
           </ProfileDescription>
         </ProfileSection>
 
         <BadgesSection>
           <InfoTitle>Badges</InfoTitle>
-          <BadgeImage src="/Employee-of-the-Month-Badge-Photoroom.png" alt="Employee of the Month" />
+          <BadgeImage src="/Employee-of-the-Month-Badge-Photoroom.png" alt="Employee of the Month" width={200} height={200} />
           <p>Employee of the Month</p>
         </BadgesSection>
 

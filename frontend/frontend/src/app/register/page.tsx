@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -68,6 +70,7 @@ const Title = styled.h2`
   font-size: 32px;
   margin-bottom: 4rem;
   background: linear-gradient(45deg, #175676, #4BA3C3);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 `;

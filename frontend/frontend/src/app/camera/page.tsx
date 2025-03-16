@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import React, { useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
-// Define types for the extracted data
 interface ExtractedData {
   seria?: string;
   nr?: string;
@@ -16,6 +17,7 @@ interface ExtractedData {
 }
 
 const CameraCapturePage = () => {
+  const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<ExtractedData>({});
   const webcamRef = useRef<Webcam | null>(null);
@@ -63,12 +65,12 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
       const response = await axios.post('http://localhost:5000/cam', {
         imageBase64,
       });
-      console.log('OCR response:', response.data);
       if (response.data.text) {
         const extracted = extractData(response.data.text);
         setExtractedData(extracted);
-      } else {
-        console.error('OCR failed or no text found.');
+        if (extracted.sex) {
+          router.push(`/dashboard/patients?showModal=true/${extracted.firstName}/${extracted.lastName}/${extracted.birthDate}/${extracted.seria}/${extracted.nr}/${extracted.cnp}/${extracted.nationality}`);
+        }
       }
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -78,6 +80,10 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
   const handleTestSample = () => {
     const extracted = extractData(sampleOCRText);
     setExtractedData(extracted);
+    if (extracted.sex) {
+      // Use template literals for URL construction
+      router.push(`/dashboard/patients?showModal=true/${extracted.firstName}/${extracted.lastName}/${extracted.birthDate}/${extracted.seria}/${extracted.nr}/${extracted.cnp}/${extracted.nationality}`);
+    }
   };
 
   const extractData = (text: string): ExtractedData => {
@@ -88,9 +94,7 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
       lastName: /(?:Last name|Nume\/Nom\/Last name)\s*\r?\n\s*([A-Za-z]+)/i,
       firstName: /(?:First name|Prenume\/Prenom\/First name)\s+([\S\s]+?)(?=\s*(?:Cetatenie|Nationalite|Nationality))/i,
       nationality: /(?:Nationality|Cetatenie\/Nationalite\/Nationality)\s*\r?\n\s*([A-Za-z]+)/i,
-      // Extract sex from "Sex" or "Sexe" or "Sext"
       sex: /(?:Sex|Sexe|Sext)\s*([M|F])/i,
-      // Extract birthdate from the CNP number (next 6 digits after the first number).
       birthDate: /CNP\s*(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/i,
     };
 
@@ -104,7 +108,7 @@ IDROUDUDUI<<MARIUS<GEZA<<<<<<<<<<<<< XD033695<4ROU0309220M250922052044997
           const year = yearPrefix + match[2];
           const month = match[3];
           const day = match[4];
-          data[key as keyof ExtractedData] = `${year}-${month}-${day}`;
+          data.birthDate = `${year}-${month}-${day}`;
         } else {
           data[key as keyof ExtractedData] = match[1].trim();
         }

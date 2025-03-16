@@ -45,6 +45,7 @@ const Title = styled.h2`
   font-size: 32px;
   margin-bottom: 2.5rem;
   background: linear-gradient(45deg, #175676, #4ba3c3);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 `;
