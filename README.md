@@ -10,7 +10,7 @@
   <img src="https://github.com/user-attachments/assets/96139051-2b2e-4fea-964e-8343c0cce552" alt="HealthSentinel-Photoroom" width="150">
 </p>
 
-**HealthSentinel** este o platformă inovatoare care facilitează digitalizarea documentelor medicale, oferind un sistem eficient și accesibil atât pentru personalul medical, cât și pentru pacienți.
+🧬**HealthSentinel** este o platformă inovatoare care facilitează digitalizarea documentelor medicale, oferind un sistem eficient și accesibil atât pentru personalul medical, cât și pentru pacienți.
 
 ### Funcționalități principale
 - **Automatizarea introducerii datelor**: Personalul medical scanează buletinul pacientului, iar sistemul completează automat datele, generând un card digital unic.
